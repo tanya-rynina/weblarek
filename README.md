@@ -98,3 +98,131 @@ Presenter - презентер содержит основную логику п
 `emit<T extends object>(event: string, data?: T): void` - инициализация события. При вызове события в метод передается название события и объект с данными, который будет использован как аргумент для вызова обработчика.  
 `trigger<T extends object>(event: string, context?: Partial<T>): (data: T) => void` - возвращает функцию, при вызове которой инициализируется требуемое в параметрах событие с передачей в него данных из второго параметра.
 
+## Данные
+
+В приложении используются следующие интерфейсы данных:
+
+### Товар
+interface IProduct {
+    id: string;
+    description: string;
+    image: string;
+    title: string;
+    category: string;
+    price: number | null;
+}
+
+### Покупатель
+interface IBuyer {
+    payment: TPayment;
+    email: string;
+    phone: string;
+    address: string;
+}
+
+### Тип оплаты
+type TPayment = 'card' | 'cash';
+
+### Заказ (отправка на сервер)
+interface IOrder {
+    payment: TPayment;
+    email: string;
+    phone: string;
+    address: string;
+    items: string[];
+    total: number;
+}
+
+### Ответ сервера со списком товаров
+interface IProductListResponse {
+    total: number;
+    items: IProduct[];
+}
+
+### Ответ сервера при успешном оформлении заказа
+interface IOrderResponse {
+    id: string;
+    total: number;
+}
+
+## Модели данных
+
+### ProductCatalog (каталог товаров)
+Назначение: Хранение списка всех товаров и товара для предпросмотра.
+Конструктор: не принимает параметров.
+#### Поля:
+
+_items: IProduct[] — массив товаров
+
+_preview: IProduct | null — товар для детального отображения
+
+#### Методы:
+
+setItems(items: IProduct[]): void — сохраняет массив товаров
+
+getItems(): IProduct[] — возвращает все товары
+
+getItem(id: string): IProduct | undefined — возвращает товар по id
+
+setPreview(item: IProduct): void — устанавливает товар для предпросмотра
+
+getPreview(): IProduct | null — возвращает товар для предпросмотра
+
+### Cart (корзина)
+Назначение: Хранение товаров, выбранных пользователем для покупки.
+Конструктор: не принимает параметров.
+#### Поля:
+
+_items: IProduct[] — массив товаров в корзине
+
+#### Методы:
+
+getItems(): IProduct[] — возвращает список товаров
+
+add(item: IProduct): void — добавляет товар, если его нет в корзине
+
+remove(id: string): void — удаляет товар по id
+
+clear(): void — очищает корзину
+
+getTotal(): number — суммарная стоимость товаров
+
+getCount(): number — количество товаров
+
+contains(id: string): boolean — проверяет наличие товара по id
+
+### Buyer (покупатель)
+Назначение: Хранение и валидация данных покупателя.
+Конструктор: не принимает параметров, поля инициализируются пустыми строками.
+#### Поля:
+
+payment: TPayment | '' — способ оплаты
+
+email: string — электронная почта
+
+phone: string — телефон
+
+address: string — адрес доставки
+
+#### Методы:
+
+setData(data: Partial<IBuyer>): void — обновляет переданные поля (можно передать только часть данных)
+
+getData(): IBuyer — возвращает все данные покупателя
+
+clear(): void — сбрасывает все поля
+
+validate(): Record<string, string> — возвращает объект с сообщениями об ошибках для незаполненных полей. Если ошибок нет, объект пустой.
+
+### Слой коммуникации
+#### AppApi
+Назначение: Выполнение HTTP-запросов к API магазина. Использует композицию – принимает экземпляр, реализующий интерфейс IApi.
+Конструктор:
+
+constructor(baseApi: IApi) — получает объект для выполнения запросов
+
+#### Методы:
+
+getProducts(): Promise<IProductListResponse> — GET-запрос на эндпоинт /product, возвращает список товаров
+
+postOrder(order: IOrder): Promise<IOrderResponse> — POST-запрос на эндпоинт /order, отправляет заказ и возвращает подтверждение
