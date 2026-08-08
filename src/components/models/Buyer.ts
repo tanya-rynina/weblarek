@@ -1,11 +1,11 @@
-import { IBuyer, TPayment } from '../../types';
+import { IBuyerData } from '../../types';
 
 /**
  * Модель данных покупателя.
  * Хранит и валидирует информацию о покупателе.
  */
 export class Buyer {
-    payment: TPayment | '' = '';
+    payment: IBuyerData['payment'] = '';
     email: string = '';
     phone: string = '';
     address: string = '';
@@ -14,14 +14,14 @@ export class Buyer {
      * Сохранить переданные поля (можно частично).
      * Позволяет обновить только одно поле, не затрагивая остальные.
      */
-    setData(data: Partial<IBuyer>): void {
+    setData(data: Partial<IBuyerData>): void {
         Object.assign(this, data);
     }
 
     /** Получить все данные покупателя */
-    getData(): IBuyer {
+    getData(): IBuyerData {
         return {
-            payment: this.payment as TPayment,
+            payment: this.payment,
             email: this.email,
             phone: this.phone,
             address: this.address,

@@ -18,9 +18,17 @@ export interface IProduct {
     price: number | null;
 }
 
-// Данные покупателя, используемые в модели
+// Полностью заполненные данные покупателя (для отправки заказа)
 export interface IBuyer {
     payment: TPayment;
+    email: string;
+    phone: string;
+    address: string;
+}
+
+// Данные покупателя в процессе заполнения (модель)
+export interface IBuyerData {
+    payment: TPayment | '';
     email: string;
     phone: string;
     address: string;
