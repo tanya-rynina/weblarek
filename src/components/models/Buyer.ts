@@ -1,56 +1,43 @@
-import { TPayment, ValidationErrors } from '../../types';
+import { IBuyer, ValidationErrors } from '../../types';
 
 export class Buyer {
-    private _payment: TPayment | '' = '';
-    private _email: string = '';
-    private _phone: string = '';
-    private _address: string = '';
+    private payment: IBuyer['payment'] = '';
+    private email: string = '';
+    private phone: string = '';
+    private address: string = '';
 
-    setData(data: Partial<{
-        payment: TPayment | '';
-        email: string;
-        phone: string;
-        address: string;
-    }>): void {
-        if (data.payment !== undefined) this._payment = data.payment;
-        if (data.email !== undefined) this._email = data.email;
-        if (data.phone !== undefined) this._phone = data.phone;
-        if (data.address !== undefined) this._address = data.address;
+    setData(data: Partial<IBuyer>): void {
+        Object.assign(this, data);
     }
 
-    getData(): {
-        payment: TPayment | '';
-        email: string;
-        phone: string;
-        address: string;
-    } {
+    getData(): IBuyer {
         return {
-            payment: this._payment,
-            email: this._email,
-            phone: this._phone,
-            address: this._address,
+            payment: this.payment,
+            email: this.email,
+            phone: this.phone,
+            address: this.address,
         };
     }
 
     clear(): void {
-        this._payment = '';
-        this._email = '';
-        this._phone = '';
-        this._address = '';
+        this.payment = '';
+        this.email = '';
+        this.phone = '';
+        this.address = '';
     }
 
     validate(): ValidationErrors {
         const errors: ValidationErrors = {};
-        if (!this._payment) {
+        if (!this.payment) {
             errors.payment = 'Не выбран способ оплаты';
         }
-        if (!this._address.trim()) {
+        if (!this.address.trim()) {
             errors.address = 'Введите адрес доставки';
         }
-        if (!this._email.trim()) {
+        if (!this.email.trim()) {
             errors.email = 'Укажите email';
         }
-        if (!this._phone.trim()) {
+        if (!this.phone.trim()) {
             errors.phone = 'Укажите телефон';
         }
         return errors;

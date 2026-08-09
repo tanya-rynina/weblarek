@@ -196,23 +196,23 @@ contains(id: string): boolean — проверяет наличие товара
 Конструктор: не принимает параметров, все поля инициализируются пустыми строками.
 #### Приватные поля:
 
-_payment: TPayment | '' — способ оплаты
+payment: TPayment | '' — способ оплаты
 
-_email: string — электронная почта
+email: string — электронная почта
 
-_phone: string — телефон
+phone: string — телефон
 
-_address: string — адрес доставки
+address: string — адрес доставки
 
 #### Методы:
 
-setData(data: Partial<{ payment: TPayment | ''; email: string; phone: string; address: string }>): void — обновляет переданные поля
+setData(data: Partial<IBuyer>): void — обновляет переданные поля (можно передать только часть данных)
 
-getData(): { payment: TPayment | ''; email: string; phone: string; address: string } — возвращает текущие данные
+getData(): IBuyer — возвращает все данные покупателя
 
 clear(): void — сбрасывает все поля
 
-validate(): ValidationErrors — возвращает объект с сообщениями об ошибках для незаполненных полей
+validate(): ValidationErrors — возвращает объект с сообщениями об ошибках для незаполненных полей. Если ошибок нет, объект пустой.
 
 ### Слой коммуникации
 #### AppApi
