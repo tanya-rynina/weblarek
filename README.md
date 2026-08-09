@@ -193,26 +193,26 @@ contains(id: string): boolean — проверяет наличие товара
 
 ### Buyer (покупатель)
 Назначение: Хранение и валидация данных покупателя.
-Конструктор: не принимает параметров, поля инициализируются пустыми строками.
-#### Поля:
+Конструктор: не принимает параметров, все поля инициализируются пустыми строками.
+#### Приватные поля:
 
-payment: TPayment | '' — способ оплаты
+_payment: TPayment | '' — способ оплаты
 
-email: string — электронная почта
+_email: string — электронная почта
 
-phone: string — телефон
+_phone: string — телефон
 
-address: string — адрес доставки
+_address: string — адрес доставки
 
 #### Методы:
 
-setData(data: Partial<IBuyer>): void — обновляет переданные поля (можно передать только часть данных)
+setData(data: Partial<{ payment: TPayment | ''; email: string; phone: string; address: string }>): void — обновляет переданные поля
 
-getData(): IBuyer — возвращает все данные покупателя
+getData(): { payment: TPayment | ''; email: string; phone: string; address: string } — возвращает текущие данные
 
 clear(): void — сбрасывает все поля
 
-validate(): Record<string, string> — возвращает объект с сообщениями об ошибках для незаполненных полей. Если ошибок нет, объект пустой.
+validate(): ValidationErrors — возвращает объект с сообщениями об ошибках для незаполненных полей
 
 ### Слой коммуникации
 #### AppApi
