@@ -1,24 +1,18 @@
 import { IBuyerData } from '../../types';
 
-/**
- * Модель данных покупателя.
- * Хранит и валидирует информацию о покупателе.
- */
+
 export class Buyer {
     payment: IBuyerData['payment'] = '';
     email: string = '';
     phone: string = '';
     address: string = '';
 
-    /**
-     * Сохранить переданные поля (можно частично).
-     * Позволяет обновить только одно поле, не затрагивая остальные.
-     */
+
     setData(data: Partial<IBuyerData>): void {
         Object.assign(this, data);
     }
 
-    /** Получить все данные покупателя */
+   
     getData(): IBuyerData {
         return {
             payment: this.payment,
@@ -28,7 +22,7 @@ export class Buyer {
         };
     }
 
-    /** Очистить все данные покупателя */
+  
     clear(): void {
         this.payment = '';
         this.email = '';
@@ -36,11 +30,7 @@ export class Buyer {
         this.address = '';
     }
 
-    /**
-     * Валидация полей.
-     * Возвращает объект с сообщениями об ошибках для незаполненных полей.
-     * Если ошибок нет, возвращает пустой объект.
-     */
+ 
     validate(): Record<string, string> {
         const errors: Record<string, string> = {};
         if (!this.payment) {

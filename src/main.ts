@@ -7,12 +7,11 @@ import { Api } from './components/base/Api';
 import { API_URL } from './utils/constants';
 import { apiProducts } from './utils/data';
 
-// ---------- Создание экземпляров моделей ----------
+
 const productCatalog = new ProductCatalog();
 const cart = new Cart();
 const buyer = new Buyer();
 
-// ---------- Тестирование моделей на тестовых данных ----------
 console.log('--- Тестирование ProductCatalog ---');
 productCatalog.setItems(apiProducts.items);
 console.log('Товары в каталоге:', productCatalog.getItems());
@@ -46,7 +45,7 @@ console.log('Ошибки валидации:', buyer.validate());
 buyer.clear();
 console.log('После очистки:', buyer.getData(), 'Ошибки:', buyer.validate());
 
-// ---------- Подключение к серверу ----------
+
 const baseApi = new Api(API_URL);
 const appApi = new AppApi(baseApi);
 
