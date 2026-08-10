@@ -13,24 +13,27 @@ export class ContactsForm extends Form<IContactsForm> {
         this.emailInput = this.container.querySelector('input[name="email"]')!;
         this.phoneInput = this.container.querySelector('input[name="phone"]')!;
 
-        this.emailInput.addEventListener('input', () => this.emitChanges());
-        this.phoneInput.addEventListener('input', () => this.emitChanges());
+        this.emailInput.addEventListener('input', () => {
+            events.emit(EVENTS.FORM_CHANGE, { field: 'email', value: this.emailInput.value });
+        });
+        this.phoneInput.addEventListener('input', () => {
+            events.emit(EVENTS.FORM_CHANGE, { field: 'phone', value: this.phoneInput.value });
+        });
     }
 
-    private emitChanges() {
-        this.events.emit(EVENTS.FORM_ERRORS, {
-            email: this.emailInput.value,
-            phone: this.phoneInput.value
-        });
+    set email(value: string) {
+        this.emailInput.value = value;
+    }
+
+    set phone(value: string) {
+        this.phoneInput.value = value;
     }
 
     protected onSubmit() {
         this.events.emit(EVENTS.CONTACTS_SUBMIT);
     }
 
-    render(data: Partial<IContactsForm> = {}): HTMLElement {
-        if (data.email) this.emailInput.value = data.email;
-        if (data.phone) this.phoneInput.value = data.phone;
+    render(): HTMLElement {
         return this.container;
     }
 }

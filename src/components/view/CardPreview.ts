@@ -1,7 +1,7 @@
 import { Card, ICommonCard } from './Card';
 import { IEvents } from '../base/Events';
 import { EVENTS } from '../../utils/constants';
-import { cloneTemplate, formatPrice } from '../../utils/utils';
+import { cloneTemplate } from '../../utils/utils';
 
 export interface IPreviewCard extends ICommonCard {
     description: string;
@@ -26,16 +26,24 @@ export class CardPreview extends Card<IPreviewCard> {
         this.descriptionElement.textContent = value;
     }
 
+    // Новые сеттеры для кнопки
+    set button(value: string) {
+        if (this.buttonElement) {
+            this.buttonElement.textContent = value;
+        }
+    }
+
+    set buttonDisabled(value: boolean) {
+        if (this.buttonElement) {
+            this.buttonElement.disabled = value;
+        }
+    }
+
     render(data?: Partial<IPreviewCard>): HTMLElement {
         if (data?.id) {
             this.productId = data.id;
         }
         super.render(data);
-        if (data) {
-            this.buttonText = data.inBasket ? 'Удалить из корзины' : 
-                              (data.price ? 'Купить' : 'Недоступно');
-            this.disableButton(!data.price);
-        }
         return this.container;
     }
 }
