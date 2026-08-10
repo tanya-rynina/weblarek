@@ -221,8 +221,177 @@ validate(): ValidationErrors — возвращает объект с сообщ
 
 constructor(baseApi: IApi) — получает объект для выполнения запросов
 
-#### Методы:
+Приватные поля:
+
+baseApi: IApi — экземпляр API для запросов
+
+Методы:
 
 getProducts(): Promise<IProductListResponse> — GET-запрос на эндпоинт /product, возвращает список товаров
 
 postOrder(order: IOrder): Promise<IOrderResponse> — POST-запрос на эндпоинт /order, отправляет заказ и возвращает подтверждение
+
+#### Утилиты
+function formatPrice(price: number | null): string
+
+Преобразует числовую цену в строку для отображения: "N синапсов" или "Бесценно", если цена null.
+
+#### Представление (View)
+
+Page
+Главный компонент страницы, управляет галереей карточек и счётчиком корзины.
+
+Конструктор: constructor(container: HTMLElement, events: IEvents)
+
+Приватные поля:
+
+basketButton: HTMLElement — кнопка открытия корзины
+
+basketCounter: HTMLElement — счётчик товаров
+
+galleryContainer: HTMLElement — контейнер для карточек
+
+Сеттеры:
+
+counter(value: number) — обновляет счётчик
+
+gallery(items: HTMLElement[]) — заменяет содержимое галереи
+
+Card<T>
+Базовый дженерик-компонент карточки товара. Отвечает за отображение названия, цены, категории, изображения и кнопки.
+Параметр типа T должен расширять ICommonCard (см. ниже).
+
+Конструктор: constructor(container: HTMLElement)
+
+Защищённые поля:
+
+titleElement, priceElement, categoryElement?, imageElement?, buttonElement?
+
+Сеттеры: title, price, category, image, buttonText, disableButton
+
+Метод render: принимает Partial<T>, возвращает корневой элемент.
+
+Вспомогательный интерфейс ICommonCard
+
+interface ICommonCard {
+    id: string;
+    title: string;
+    price: string;   // готовая строка для отображения
+    category: string;
+    image: string;
+}
+CardCatalog (наследует Card<ICatalogCard>)
+Карточка для галереи. При клике генерирует событие card:select с id товара.
+
+Конструктор: constructor(template: HTMLTemplateElement, events: IEvents)
+
+Метод render: принимает Partial<ICatalogCard>, где ICatalogCard — это Pick<IProduct, 'id'|'title'|'category'|'image'> и строка price.
+
+CardPreview (наследует Card<IPreviewCard>)
+Карточка для подробного просмотра в модальном окне. Показывает описание и кнопку «Купить»/«Удалить».
+
+Конструктор: constructor(template: HTMLTemplateElement, events: IEvents)
+
+Дополнительные сеттеры: description
+
+Метод render: принимает Partial<IPreviewCard>, где IPreviewCard расширяет ICommonCard полями description: string и inBasket: boolean.
+
+CardBasket (наследует Card<IBasketCard>)
+Карточка товара в корзине. Содержит индекс и кнопку удаления.
+
+Конструктор: constructor(template: HTMLTemplateElement, events: IEvents)
+
+Сеттер: index
+
+Метод render: принимает Partial<IBasketCard>, где IBasketCard расширяет ICommonCard полем index: number.
+
+Modal
+Управляет отображением модального окна. Вставляет контент, обрабатывает закрытие по крестику/оверлею.
+
+Конструктор: constructor(container: HTMLElement, private events: IEvents)
+
+Свойство content — записывает переданный DOM-элемент в modal__content.
+
+Методы: open(), close() – управляют классами modal_active и генерируют события modal:open / modal:close.
+
+Form<T> (абстрактный)
+Базовая форма, содержит кнопку сабмита и вывод ошибок.
+
+Конструктор: protected constructor(container: HTMLFormElement, protected events: IEvents)
+
+Абстрактный метод: onSubmit()
+
+Сеттеры: valid (блокирует/разблокирует кнопку), errors (устанавливает текст ошибок).
+
+OrderForm (наследует Form<IOrderForm>)
+Форма первого шага оформления: выбор способа оплаты (подсветка кнопки) и адрес.
+
+Конструктор: constructor(template: HTMLTemplateElement, events: IEvents)
+
+При изменении полей эмитит form:errors с текущими значениями payment и address.
+
+Метод render: принимает Partial<IOrderForm> для предзаполнения.
+
+ContactsForm (наследует Form<IContactsForm>)
+Форма второго шага: email и телефон.
+
+При изменении полей эмитит form:errors с текущими значениями email и phone.
+
+Метод render: принимает Partial<IContactsForm> для предзаполнения.
+
+Basket
+Отображает список товаров корзины и общую стоимость, кнопку «Оформить».
+
+Конструктор: constructor(container: HTMLElement, events: IEvents)
+
+Сеттеры: items (массив IProduct) – создаёт карточки CardBasket, total – обновляет текстовую сумму.
+
+При нажатии на кнопку «Оформить» генерирует order:open.
+
+OrderSuccess
+Компонент уведомления об успешном заказе.
+
+Конструктор: constructor(template: HTMLTemplateElement, onClose: () => void)
+
+Сеттер: total – выводит сообщение «Списано N синапсов».
+
+Кнопка закрытия вызывает переданный колбэк onClose.
+
+## События приложения
+
+| Событие                | Источник        | Описание                                 |
+|------------------------|-----------------|------------------------------------------|
+| `catalog:changed`      | ProductCatalog  | Изменился каталог товаров                |
+| `preview:changed`      | ProductCatalog  | Выбран товар для просмотра               |
+| `cart:changed`         | Cart            | Изменилось содержимое корзины           |
+| `buyer:changed`        | Buyer           | Изменились данные покупателя            |
+| `card:select`          | CardCatalog     | Клик по карточке в галерее (id)         |
+| `cart:open`            | Page (кнопка)   | Открыть корзину                          |
+| `cart:remove`          | CardBasket      | Удалить товар из корзины (id)           |
+| `order:open`           | Basket (кнопка) | Начало оформления заказа                 |
+| `order:submit`         | OrderForm       | Переход ко второй форме                  |
+| `contacts:submit`      | ContactsForm    | Отправка заказа                          |
+| `form:errors`          | OrderForm, ContactsForm | Изменение данных в форме (для валидации) |
+| `modal:open`           | Modal           | Модальное окно открыто                   |
+| `modal:close`          | Modal           | Модальное окно закрыто                   |
+| `card:toggle`          | CardPreview     | Нажатие кнопки «Купить» или «Удалить»    |
+
+
+Презентер
+Код презентера реализован в src/main.ts. Он связывает модели и представления через события:
+
+При загрузке страницы получает каталог товаров через AppApi и сохраняет в ProductCatalog. Модель генерирует catalog:changed, презентер перехватывает его и заполняет галерею (Page.gallery) карточками CardCatalog.
+
+Клик по карточке товара → событие card:select, презентер получает id, вызывает ProductCatalog.setPreview(), что вызывает preview:changed. Презентер создаёт CardPreview с данными, включая признак inBasket, и передаёт в Modal.
+
+В CardPreview кнопка «Купить»/«Удалить» генерирует card:toggle. Презентер добавляет товар в корзину или удаляет его, после чего закрывает модальное окно.
+
+Кнопка корзины (в Page) → cart:open → презентер создаёт Basket, устанавливает items и total, открывает модалку.
+
+Удаление из корзины (cart:remove) → Cart.remove() → модель генерирует cart:changed, презентер обновляет счётчик в Page. Если открыта корзина, перерисовывает её содержимое.
+
+Кнопка «Оформить» (в Basket) → order:open → презентер показывает OrderForm, подписывается на form:errors, валидирует первую часть данных через Buyer.validate() и управляет активностью кнопки «Далее» (показывает только ошибки, относящиеся к первому шагу).
+
+При order:submit переключает на ContactsForm, снова обрабатывает form:errors, валидирует вторую часть (показывает только ошибки email и телефона).
+
+При contacts:submit презентер формирует IOrder, отправляет его через AppApi.postOrder(). В случае успеха очищает корзину и данные покупателя, показывает OrderSuccess с суммой заказа, закрытие по кнопке вызывает Modal.close().

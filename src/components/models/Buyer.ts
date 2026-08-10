@@ -1,4 +1,6 @@
 import { IBuyer, ValidationErrors } from '../../types';
+import { IEvents } from '../base/Events';
+import { EVENTS } from '../../utils/constants';
 
 export class Buyer {
     private payment: IBuyer['payment'] = '';
@@ -6,8 +8,11 @@ export class Buyer {
     private phone: string = '';
     private address: string = '';
 
+    constructor(private events: IEvents) {}
+
     setData(data: Partial<IBuyer>): void {
         Object.assign(this, data);
+        this.events.emit(EVENTS.BUYER_CHANGED, this.getData());
     }
 
     getData(): IBuyer {
@@ -24,6 +29,7 @@ export class Buyer {
         this.email = '';
         this.phone = '';
         this.address = '';
+        this.events.emit(EVENTS.BUYER_CHANGED, this.getData());
     }
 
     validate(): ValidationErrors {

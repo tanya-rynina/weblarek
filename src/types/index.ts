@@ -40,3 +40,14 @@ export interface IOrderResponse {
 }
 
 export type ValidationErrors = Record<string, string>;
+
+// Новые типы для форм
+export interface IOrderForm {
+    payment: TPayment;
+    address: string;
+}
+
+export interface IContactsForm {
+    email: string;
+    phone: string;
+}
