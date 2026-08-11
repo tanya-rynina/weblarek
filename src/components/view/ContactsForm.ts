@@ -21,6 +21,10 @@ export class ContactsForm extends Form<IContactsForm> {
         });
     }
 
+    get element(): HTMLElement {
+        return this.container;
+    }
+
     set email(value: string) {
         this.emailInput.value = value;
     }

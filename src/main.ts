@@ -36,16 +36,10 @@ const templates = {
 
 const page = new Page(document.querySelector(".page")!, events);
 const modal = new Modal(document.getElementById("modal-container")!, events);
-
-let currentOrderForm: OrderForm | null = null;
-let currentContactsForm: ContactsForm | null = null;
-let currentView: string | null = null; // 'preview', 'basket', 'order', 'contacts', 'success'
-
-events.on(EVENTS.MODAL_CLOSE, () => {
-  currentView = null;
-  currentOrderForm = null;
-  currentContactsForm = null;
-});
+const orderForm = new OrderForm(templates.order, events);
+const contactsForm = new ContactsForm(templates.contacts, events);
+const basketView = new Basket(cloneTemplate(templates.basket), events);
+const orderSuccess = new OrderSuccess(templates.success, events);
 
 events.on(EVENTS.CATALOG_CHANGED, (data: { items: IProduct[] }) => {
   const cards = data.items.map((item) => {
@@ -97,7 +91,6 @@ events.on(EVENTS.PREVIEW_CHANGED, (data: { preview: IProduct }) => {
   preview.button = buttonText;
   preview.buttonDisabled = buttonDisabled;
 
-  currentView = "preview";
   modal.open();
 });
 
@@ -113,14 +106,17 @@ events.on(EVENTS.CARD_TOGGLE, (data: { id: string }) => {
 });
 
 events.on(EVENTS.CART_OPEN, () => {
-  showBasket();
+  basketView.items = cart.getItems();
+  basketView.total = cart.getTotal();
+  modal.content = basketView.element;
   modal.open();
 });
 
 events.on(EVENTS.CART_CHANGED, () => {
   page.counter = cart.getCount();
-  if (currentView === "basket") {
-    showBasket();
+  if (modal.content?.firstElementChild === basketView.element) {
+    basketView.items = cart.getItems();
+    basketView.total = cart.getTotal();
   }
 });
 
@@ -129,17 +125,12 @@ events.on(EVENTS.CART_REMOVE, (data: { id: string }) => {
 });
 
 events.on(EVENTS.ORDER_OPEN, () => {
-  currentOrderForm = new OrderForm(templates.order, events);
-  modal.content = currentOrderForm.render();
-  currentView = "order";
-  updateFormsFromBuyer();
+  modal.content = orderForm.element;
+  modal.open();
 });
 
 events.on(EVENTS.ORDER_SUBMIT, () => {
-  currentContactsForm = new ContactsForm(templates.contacts, events);
-  modal.content = currentContactsForm.render();
-  currentView = "contacts";
-  updateFormsFromBuyer();
+  modal.content = contactsForm.element;
 });
 
 events.on(EVENTS.CONTACTS_SUBMIT, () => {
@@ -156,10 +147,8 @@ events.on(EVENTS.CONTACTS_SUBMIT, () => {
     .then((response) => {
       cart.clear();
       buyer.clear();
-      const success = new OrderSuccess(templates.success, () => modal.close());
-      success.total = response.total;
-      modal.content = success.render();
-      currentView = "success";
+      orderSuccess.total = response.total;
+      modal.content = orderSuccess.element;
     })
     .catch((err) => console.error("Ошибка оформления заказа", err));
 });
@@ -172,42 +161,26 @@ events.on(EVENTS.BUYER_CHANGED, () => {
   const buyerData = buyer.getData();
   const errors = buyer.validate();
 
-  if (currentOrderForm) {
-    currentOrderForm.payment = buyerData.payment as TPayment;
-    currentOrderForm.address = buyerData.address;
+  orderForm.payment = buyerData.payment as TPayment;
+  orderForm.address = buyerData.address;
+  const orderErrors = [errors.payment, errors.address]
+    .filter(Boolean)
+    .join(". ");
+  orderForm.valid = !errors.payment && !errors.address;
+  orderForm.errors = orderErrors;
 
-    const orderErrors = [errors.payment, errors.address]
-      .filter(Boolean)
-      .join(". ");
-    currentOrderForm.valid = !errors.payment && !errors.address;
-    currentOrderForm.errors = orderErrors;
-  }
-
-  if (currentContactsForm) {
-    currentContactsForm.email = buyerData.email;
-    currentContactsForm.phone = buyerData.phone;
-    const contactsErrors = [errors.email, errors.phone]
-      .filter(Boolean)
-      .join(". ");
-    currentContactsForm.valid = !errors.email && !errors.phone;
-    currentContactsForm.errors = contactsErrors;
-  }
+  contactsForm.email = buyerData.email;
+  contactsForm.phone = buyerData.phone;
+  const contactsErrors = [errors.email, errors.phone]
+    .filter(Boolean)
+    .join(". ");
+  contactsForm.valid = !errors.email && !errors.phone;
+  contactsForm.errors = contactsErrors;
 });
 
-function updateFormsFromBuyer() {
-  events.emit(EVENTS.BUYER_CHANGED);
-}
-
-function showBasket() {
-  const basketView = new Basket(cloneTemplate(templates.basket), events);
-  basketView.items = cart.getItems();
-  basketView.total = cart.getTotal();
-  modal.content = basketView.render({
-    items: cart.getItems(),
-    total: cart.getTotal(),
-  });
-  currentView = "basket";
-}
+events.on(EVENTS.MODAL_CLOSE, () => {
+  modal.close();
+});
 
 appApi
   .getProducts()

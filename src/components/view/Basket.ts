@@ -10,7 +10,7 @@ export class Basket extends Component<{ items: IProduct[]; total: number }> {
     private totalElement: HTMLElement;
     private button: HTMLButtonElement;
     private cardTemplate: HTMLTemplateElement;
-    private events: IEvents;          // было пропущено
+    private events: IEvents;
 
     constructor(container: HTMLElement, events: IEvents) {
         super(container);
@@ -25,12 +25,15 @@ export class Basket extends Component<{ items: IProduct[]; total: number }> {
         });
     }
 
+    get element(): HTMLElement {
+        return this.container;
+    }
+
     set items(items: IProduct[]) {
         this.listContainer.replaceChildren();
-        if (items.length === 0) return; // CSS покажет «Корзина пуста»
+        if (items.length === 0) return;
         items.forEach((item, index) => {
             const card = new CardBasket(this.cardTemplate, this.events);
-            // Приводим цену к строке для отображения
             this.listContainer.appendChild(
                 card.render({
                     id: item.id,

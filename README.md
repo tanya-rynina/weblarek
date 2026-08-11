@@ -306,14 +306,10 @@ CardBasket (наследует Card<IBasketCard>)
 Метод render: принимает Partial<IBasketCard>, где IBasketCard расширяет ICommonCard полем index: number.
 
 Modal
-Управляет отображением модального окна. Вставляет контент, обрабатывает закрытие по крестику/оверлею.
-
-Конструктор: constructor(container: HTMLElement, private events: IEvents)
-
-Свойство content — записывает переданный DOM-элемент в modal__content.
-
-Методы: open(), close() – управляют классами modal_active и генерируют события modal:open / modal:close.
-
+Управляет отображением модального окна. Вставляет контент, обрабатывает закрытие по крестику/оверлею.  
+- **Конструктор:** `constructor(container: HTMLElement, private events: IEvents)`  
+- **Свойство `content`** — записывает переданный DOM-элемент в `modal__content`.  
+- **Методы:** `open()`, `close()` – управляют классами `modal_active`. События не эмитируются.
 Form<T> (абстрактный)
 Базовая форма, содержит кнопку сабмита и вывод ошибок.
 
@@ -338,6 +334,7 @@ ContactsForm (наследует Form<IContactsForm>)
 При изменении полей эмитит form:errors с текущими значениями email и phone.
 
 Метод render: принимает Partial<IContactsForm> для предзаполнения.
+- Геттер `element` возвращает корневой DOM-элемент компонента.
 
 Basket
 Отображает список товаров корзины и общую стоимость, кнопку «Оформить».
@@ -347,15 +344,14 @@ Basket
 Сеттеры: items (массив IProduct) – создаёт карточки CardBasket, total – обновляет текстовую сумму.
 
 При нажатии на кнопку «Оформить» генерирует order:open.
+- Геттер `element` возвращает корневой DOM-элемент компонента.
 
 OrderSuccess
-Компонент уведомления об успешном заказе.
-
-Конструктор: constructor(template: HTMLTemplateElement, onClose: () => void)
-
-Сеттер: total – выводит сообщение «Списано N синапсов».
-
-Кнопка закрытия вызывает переданный колбэк onClose.
+Компонент уведомления об успешном заказе.  
+- **Конструктор:** `constructor(template: HTMLTemplateElement, events: IEvents)`  
+- **Сеттер:** `total` – выводит сообщение «Списано N синапсов».  
+- Кнопка закрытия эмитит `modal:close`.  
+- Геттер `element` возвращает корневой элемент.
 
 ## События приложения
 
@@ -371,13 +367,11 @@ OrderSuccess
 | `order:open`           | Basket (кнопка) | Начало оформления заказа                 |
 | `order:submit`         | OrderForm       | Переход ко второй форме                  |
 | `contacts:submit`      | ContactsForm    | Отправка заказа                          |
-| `form:errors`          | OrderForm, ContactsForm | Изменение данных в форме (для валидации) |
-| `modal:open`           | Modal           | Модальное окно открыто                   |
-| `modal:close`          | Modal           | Модальное окно закрыто                   |
+| `form:change`          | OrderForm, ContactsForm | Изменение поля формы (field, value)   |
+| `modal:close`          | OrderSuccess    | Запрос на закрытие модального окна       |
 | `card:toggle`          | CardPreview     | Нажатие кнопки «Купить» или «Удалить»    |
 
-
-Презентер
+## Презентер
 Код презентера реализован в src/main.ts. Он связывает модели и представления через события:
 
 При загрузке страницы получает каталог товаров через AppApi и сохраняет в ProductCatalog. Модель генерирует catalog:changed, презентер перехватывает его и заполняет галерею (Page.gallery) карточками CardCatalog.

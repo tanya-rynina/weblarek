@@ -11,7 +11,7 @@ export class OrderForm extends Form<IOrderForm> {
 
     constructor(template: HTMLTemplateElement, events: IEvents) {
         super(cloneTemplate(template) as HTMLFormElement, events);
-         this.submitButton = this.container.querySelector('.order__button')!;
+           this.submitButton = this.container.querySelector('.order__button')!;
 
         this.cardButton = this.container.querySelector('button[name="card"]')!;
         this.cashButton = this.container.querySelector('button[name="cash"]')!;
@@ -26,6 +26,10 @@ export class OrderForm extends Form<IOrderForm> {
         this.addressInput.addEventListener('input', () => {
             events.emit(EVENTS.FORM_CHANGE, { field: 'address', value: this.addressInput.value });
         });
+    }
+
+    get element(): HTMLElement {
+        return this.container;
     }
 
     set payment(value: TPayment) {

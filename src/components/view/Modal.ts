@@ -1,6 +1,5 @@
 import { Component } from '../base/Component';
 import { IEvents } from '../base/Events';
-import { EVENTS } from '../../utils/constants';
 
 export class Modal extends Component<null> {
     private contentContainer: HTMLElement;
@@ -8,8 +7,15 @@ export class Modal extends Component<null> {
 
     constructor(container: HTMLElement, private events: IEvents) {
         super(container);
-        this.closeButton = container.querySelector('.modal__close')!;
-        this.contentContainer = container.querySelector('.modal__content')!;
+        const closeBtn = container.querySelector('.modal__close');
+        const content = container.querySelector('.modal__content');
+        
+        if (!closeBtn || !content) {
+            throw new Error('Modal: не найдены обязательные элементы .modal__close или .modal__content');
+        }
+        
+        this.closeButton = closeBtn as HTMLButtonElement;
+        this.contentContainer = content as HTMLElement;
 
         this.closeButton.addEventListener('click', () => this.close());
         container.addEventListener('click', (ev) => {
@@ -24,12 +30,10 @@ export class Modal extends Component<null> {
     open() {
         this.container.classList.add('modal_active');
         document.querySelector('.page')?.classList.add('modal_active');
-        this.events.emit(EVENTS.MODAL_OPEN);
     }
 
     close() {
         this.container.classList.remove('modal_active');
         document.querySelector('.page')?.classList.remove('modal_active');
-        this.events.emit(EVENTS.MODAL_CLOSE);
     }
 }
